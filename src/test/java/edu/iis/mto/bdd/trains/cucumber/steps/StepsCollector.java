@@ -1,6 +1,7 @@
 package edu.iis.mto.bdd.trains.cucumber.steps;
 
 import cucumber.api.PendingException;
+import cucumber.api.Transform;
 import cucumber.api.java.pl.Gdy;
 import cucumber.api.java.pl.I;
 import cucumber.api.java.pl.Wtedy;
@@ -19,7 +20,8 @@ public class StepsCollector {
     private LocalTime arrivingTime;
 
     @Zakładając("^, że chcę się dostać z \"(.*)\" do \"(.*)\"$")
-    public void givenStartingPointToDestinationPoint(String startingPoint, String destinationPoint) throws Throwable {
+    public void givenStartingPointToDestinationPoint(
+            String startingPoint, String destinationPoint) throws Throwable {
         this.startingPoint = startingPoint;
         this.destinationPoint = destinationPoint;
 
@@ -27,8 +29,9 @@ public class StepsCollector {
     }
 
     @I("^następny pociąg odjeżdża o (\\d+):(\\d+) na linii \"(.*)\"")
-    public void setUpNextTrain(int hours, int minutes, String line) throws Throwable {
-        timetableService.scheduleArrivalTime(line, new LocalTime(hours, minutes));
+    public void setUpNextTrain(
+            @Transform(JodaLocalTimeConverter.class) LocalTime departureTime, String line) throws Throwable {
+        timetableService.scheduleArrivalTime(line, departureTime);
         this.line = line;
 
         throw new PendingException();
@@ -42,8 +45,9 @@ public class StepsCollector {
     }
 
     @Wtedy("^powinienem uzyskać następujący szacowany czas przyjazdu: (\\d+):(\\d+)$")
-    public void thenShouldGetArrivingTime(int hours, int minutes) throws Throwable {
-        arrivingTime.equals(new LocalTime(hours, minutes));
+    public void thenShouldGetArrivingTime(
+            @Transform(JodaLocalTimeConverter.class) LocalTime expectedArrivingTime) throws Throwable {
+        expectedArrivingTime.equals(arrivingTime);
 
         throw new PendingException();
     }
